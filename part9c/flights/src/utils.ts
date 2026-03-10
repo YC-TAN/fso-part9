@@ -1,50 +1,61 @@
 import { NewDiaryEntry, Weather, Visibility } from './types';
 import { z } from 'zod';
 
-const isString = (text: unknown): text is string => {
-  return typeof text === 'string' || text instanceof String;
+export const NewEntrySchema = z.object({
+  weather: z.nativeEnum(Weather),
+  visibility: z.nativeEnum(Visibility),
+  date: z.string().date(),
+  comment: z.string().optional()
+});
+
+export const toNewDiaryEntry = (object: unknown): NewDiaryEntry => {
+  return NewEntrySchema.parse(object);
 };
 
-const parseComment = (comment: unknown): string => {
-  if (!isString(comment)) {
-    throw new Error('Incorrect or missing comment');
-  }
+// const isString = (text: unknown): text is string => {
+//   return typeof text === 'string' || text instanceof String;
+// };
 
-  return z.string().parse(comment);
-};
+// const parseComment = (comment: unknown): string => {
+//   if (!isString(comment)) {
+//     throw new Error('Incorrect or missing comment');
+//   }
 
-const isDate = (date: string): boolean => {
-  return Boolean(Date.parse(date));
-};
+//   return z.string().parse(comment);
+// };
 
-const parseDate = (date: unknown): string => {
-  if (!isString(date) || !isDate(date)) {
-      throw new Error('Incorrect or missing date: ' + date);
-  }
-  return date;
-};
+// const isDate = (date: string): boolean => {
+//   return Boolean(Date.parse(date));
+// };
 
-const isWeather = (param: string): param is Weather => {
-  return Object.values(Weather).map(v => v.toString()).includes(param);
-};
+// const parseDate = (date: unknown): string => {
+//   if (!isString(date) || !isDate(date)) {
+//       throw new Error('Incorrect or missing date: ' + date);
+//   }
+//   return date;
+// };
 
-const parseWeather = (weather: unknown): Weather => {
-  if (!isString(weather) || !isWeather(weather)) {
-      throw new Error('Incorrect weather: ' + weather);
-  }
-  return weather;
-};
+// const isWeather = (param: string): param is Weather => {
+//   return Object.values(Weather).map(v => v.toString()).includes(param);
+// };
 
-const isVisibility = (param: string): param is Visibility => {
-  return Object.values(Visibility).map(v => v.toString()).includes(param);
-};
+// const parseWeather = (weather: unknown): Weather => {
+//   if (!isString(weather) || !isWeather(weather)) {
+//       throw new Error('Incorrect weather: ' + weather);
+//   }
+//   return weather;
+// };
 
-const parseVisibility = (visibility: unknown): Visibility => {
-  if ( !isString(visibility) || !isVisibility(visibility)) {
-      throw new Error('Incorrect or missing visibility: ' + visibility);
-  }
-  return visibility;
-};
+// const isVisibility = (param: string): param is Visibility => {
+//   return Object.values(Visibility).map(v => v.toString()).includes(param);
+// };
+
+// const parseVisibility = (visibility: unknown): Visibility => {
+//   if ( !isString(visibility) || !isVisibility(visibility)) {
+//       throw new Error('Incorrect or missing visibility: ' + visibility);
+//   }
+//   return visibility;
+// };
 
 // const toNewDiaryEntry = (object: unknown): NewDiaryEntry => {
 //   if ( !object || typeof object !== 'object' ) {
@@ -84,14 +95,3 @@ const parseVisibility = (visibility: unknown): Visibility => {
 
 //   throw new Error('Incorrect data: some fields are missing');
 // };
-
-export const NewEntrySchema = z.object({
-  weather: z.nativeEnum(Weather),
-  visibility: z.nativeEnum(Visibility),
-  date: z.string().date(),
-  comment: z.string().optional()
-});
-
-export const toNewDiaryEntry = (object: unknown): NewDiaryEntry => {
-  return NewEntrySchema.parse(object);
-};
