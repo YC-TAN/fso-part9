@@ -1,4 +1,5 @@
 import { NewDiaryEntry, Weather, Visibility } from './types';
+import { z } from 'zod';
 
 const isString = (text: unknown): text is string => {
   return typeof text === 'string' || text instanceof String;
@@ -9,7 +10,7 @@ const parseComment = (comment: unknown): string => {
     throw new Error('Incorrect or missing comment');
   }
 
-  return comment;
+  return z.string().parse(comment);
 };
 
 const isDate = (date: string): boolean => {
@@ -45,23 +46,52 @@ const parseVisibility = (visibility: unknown): Visibility => {
   return visibility;
 };
 
-const toNewDiaryEntry = (object: unknown): NewDiaryEntry => {
-  if ( !object || typeof object !== 'object' ) {
-    throw new Error('Incorrect or missing data');
-  }
+// const toNewDiaryEntry = (object: unknown): NewDiaryEntry => {
+//   if ( !object || typeof object !== 'object' ) {
+//     throw new Error('Incorrect or missing data');
+//   }
 
-  if ('comment' in object && 'date' in object && 'weather' in object && 'visibility' in object)  {
-    const newEntry: NewDiaryEntry = {
-      weather: parseWeather(object.weather),
-      visibility: parseVisibility(object.visibility),
-      date: parseDate(object.date),
-      comment: parseComment(object.comment)
-    };
+//   if ('comment' in object && 'date' in object && 'weather' in object && 'visibility' in object)  {
+//     const newEntry: NewDiaryEntry = {
+//       weather: parseWeather(object.weather),
+//       visibility: parseVisibility(object.visibility),
+//       date: parseDate(object.date),
+//       comment: parseComment(object.comment)
+//     };
 
-    return newEntry;
-  }
+//     return newEntry;
+//   }
 
-  throw new Error('Incorrect data: some fields are missing');
+//   throw new Error('Incorrect data: some fields are missing');
+// };
+
+// export const toNewDiaryEntry = (object: unknown): NewDiaryEntry => {
+//   if ( !object || typeof object !== 'object' ) {
+//     throw new Error('Incorrect or missing data');
+//   }
+
+//   if ('comment' in object && 'date' in object && 'weather' in object && 'visibility' in object)  {
+//     const newEntry: NewDiaryEntry = {
+
+//       weather: z.nativeEnum(Weather).parse(object.weather),
+//       visibility: z.nativeEnum(Visibility).parse(object.visibility),
+//       date: z.string().date().parse(object.date),
+//       comment: z.string().optional().parse(object.comment)
+//     };
+
+//     return newEntry;
+//   }
+
+//   throw new Error('Incorrect data: some fields are missing');
+// };
+
+export const NewEntrySchema = z.object({
+  weather: z.nativeEnum(Weather),
+  visibility: z.nativeEnum(Visibility),
+  date: z.string().date(),
+  comment: z.string().optional()
+});
+
+export const toNewDiaryEntry = (object: unknown): NewDiaryEntry => {
+  return NewEntrySchema.parse(object);
 };
-
-export default toNewDiaryEntry;
