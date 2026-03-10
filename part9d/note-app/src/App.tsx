@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getAllNotes, createNote } from './noteService'
 
 interface Note {
   id: string,
@@ -11,13 +12,17 @@ const App = () => {
     { id: '1', content: 'testing' }
   ]);
 
+  useEffect(() => {
+    getAllNotes().then(data => {
+      setNotes(data)
+    })
+  }, [])
+
   const noteCreation = (event: React.SyntheticEvent) => {
     event.preventDefault()
-    const noteToAdd = {
-      content: newNote,
-      id: String(notes.length + 1)
-    }
-    setNotes(notes.concat(noteToAdd));
+    createNote({ content: newNote }).then(data => {
+      setNotes(notes.concat(data))
+    })
     setNewNote('')
   };
 
@@ -38,3 +43,5 @@ const App = () => {
     </div>  
 )
 }
+
+export default App;
