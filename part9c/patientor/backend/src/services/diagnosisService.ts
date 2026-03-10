@@ -7,4 +7,4 @@ const getEntries = (): Diagnosis[] => {
 
 export default {
     getEntries,
-}
+};
