@@ -1,14 +1,28 @@
 import express, {Request, Response, NextFunction} from 'express';
 import {z} from 'zod';
 
-import { NewPatient, Patient, PatientWithoutSsn } from '../types';
+import { NewPatient, Patient, NonSensitivePatient, ErrorResponse } from '../types';
 import patientService from '../services/patientService';
 import { NewPatientSchema } from '../utils/patientParser';
 
 const router = express.Router();
 
-router.get('/', (_req, res: Response<PatientWithoutSsn[]>) => {
+router.get('/', (_req, res: Response<NonSensitivePatient[]>) => {
     res.send(patientService.getPatients());
+});
+
+router.get('/:id', (req, res: Response<Patient | ErrorResponse >) => {
+
+    const id = req.params.id;
+
+    const patientReturned = patientService.getPatient(id);
+
+    if (!patientReturned) {
+      res.status(404).send({ error: 'Patient not found' });
+    } else {
+      res.send(patientReturned);
+    }
+    
 });
 
 const newPatientParser = (req: Request, _res: Response, next: NextFunction) => { 

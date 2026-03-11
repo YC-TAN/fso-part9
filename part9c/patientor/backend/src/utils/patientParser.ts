@@ -4,9 +4,10 @@ import {z} from 'zod';
 export const NewPatientSchema = z.object({
     name: z.string(),
     ssn: z.string(),
-    gender: z.nativeEnum(Gender),
+    gender: z.enum(Gender),
     dateOfBirth: z.string().date(),
-    occupation: z.string()
+    occupation: z.string(),
+    entries: z.array(z.any()).default([]),
 });
 
 export const toNewPatientEntry = (object: unknown): NewPatient => {
