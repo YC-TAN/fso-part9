@@ -1,18 +1,65 @@
-import { NewPatient, Gender } from "../types";
+import { Gender, HealthCheckRating } from "../types";
 import {z} from 'zod';
+
+// const parseDiagnosisCodes = (object: unknown): Array<Diagnosis['code']> =>  {
+//   if (!object || typeof object !== 'object' || !('diagnosisCodes' in object)) {
+//     // we will just trust the data to be in correct form
+//     return [] as Array<Diagnosis['code']>;
+//   }
+
+//   return object.diagnosisCodes as Array<Diagnosis['code']>;
+// };
+
+const EntryBaseSchema = z.object({
+  description: z.string(),
+  date: z.string().date(),
+  specialist: z.string(),
+  diagnosisCodes: z.array(z.string()).optional(),
+});
+
+// Specific schemas
+const HealthCheckEntrySchema = EntryBaseSchema.extend({
+  type: z.literal("HealthCheck"),
+  healthCheckRating: z.nativeEnum(HealthCheckRating)
+});
+
+const HospitalEntrySchema = EntryBaseSchema.extend({
+  type: z.literal("Hospital"),
+  discharge: z.object({
+    date: z.string(),
+    criteria: z.string(),
+  }),
+});
+
+const OccupationalHealthcareEntrySchema = EntryBaseSchema.extend({
+  type: z.literal("OccupationalHealthcare"),
+  employerName: z.string(),
+  sickLeave: z.object({
+    startDate: z.string().date(),
+    endDate: z.string().date()
+  }).optional()
+});
+
+// Create the Union schema
+export const NewEntrySchema = z.union([
+  HealthCheckEntrySchema,
+  HospitalEntrySchema,
+  OccupationalHealthcareEntrySchema
+]);
+
 
 export const NewPatientSchema = z.object({
     name: z.string(),
     ssn: z.string(),
-    gender: z.enum(Gender),
+    gender: z.nativeEnum(Gender),
     dateOfBirth: z.string().date(),
     occupation: z.string(),
-    entries: z.array(z.any()).default([]),
+    entries: z.array(NewEntrySchema).optional(),
 });
 
-export const toNewPatientEntry = (object: unknown): NewPatient => {
-  return NewPatientSchema.parse(object);
-};
+// export const toNewPatientEntry = (object: unknown): NewPatient => {
+//   return NewPatientSchema.parse(object);
+// };
 
 // const isString = (text: unknown): text is string => {
 //   return typeof text === 'string' || text instanceof String;
